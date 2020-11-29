@@ -214,7 +214,7 @@ def find_best_split_ID3(data, header):
 
     return best_gain, best_question
 
-#O(n*m*2^n)
+#O(2^n)
 def build_CART_tree(data, header, limit = -1):
     """ Recursively creates an object of type DecisionNode as a Node of a CART Tree.
     
@@ -334,6 +334,37 @@ def read_node(f, header):
         
         return Leaf(data)
 
+#O(n)
+def classify(row, node):
+    """ Calculates the probability os success of a given data, using the leaves of a given tree.
+    
+    :param row: a row from certain dataset.
+    :param node: an object of type DecisionNode which stores the question to classify.
+    :return: a dictionary with the predictions of success.
+    """
+    if isinstance(node, Leaf):  # If the node is a Leaf, return the predictions.
+        return node.predictions
+
+    if node.question.match(row):
+        return classify(row, node.true_child)
+    else:
+        return classify(row, node.false_child)
+
+#O(n)
+def print_prediction(predictions):
+    """ Creates a dictionary with the probability of success and failure with the predictions of a leaf.
+    
+    :param predictions: a dictionary with the predictions of a Leaf object.
+    :return: a dictionary.
+    """
+    total = sum(predictions.values()) * 1.0
+    probs = {}
+    for lbl in predictions.keys():
+        probs[lbl] = str(int(predictions[lbl] / total * 100)) + "%"
+    return probs
+
+# TREE IMPLEMENTATION.
+
 class Question:
     """ An object type that implements the question to decide if certain data satisfy or not a condition.
     """
@@ -366,7 +397,7 @@ class Question:
     
     #O(1)
     def __str__(self):
-        """ Prints the question with the label an value to check.
+        """ Creates a string where is the question with the label and value to check.
         
         :return: a string.
         """
@@ -389,7 +420,7 @@ class Leaf:
     
     #O(1)
     def imprimir(self, spacing = ""):
-        """ Prints the cases of each prediction value appearance in the data.
+        """ Creates a string with the cases of each prediction value appearance in the data.
         
         :return: a string.
         """
@@ -397,13 +428,22 @@ class Leaf:
     
     #O(1)
     def graph(self, digraph, name):
+        """ Creates a digraph node with the probability of success according to the predictions.
+        Colors the node by the probability. Red if it is less than 50, orange if it is less than 60, gold if it is less than 75, cyan if it is less than 90 and green if it is greater than 90.
+        
+        :param digraph: an object of type Digraph to create the node.
+        :param name: a string which will be the name of the created node.
+        :return: the same Digraph with the created node.
+        """
         try:
-            p = round((self.predictions.get(1)/(sum(self.predictions.values()) * 1.0)) * 100, 2)
+            p = round((self.predictions.get(1)/(sum(self.predictions.values()) * 1.0)) * 100, 2)  # Calculates the probaility of success.
         except(TypeError, ValueError):
-            p = 0
+            p = 0  # If there is no success cases.
+            
         label = "Probability of success: " + str(p) + "%"
         color = "red"
-        if p > 50.0:
+        
+        if p > 50.0: # Decides the color of the node.
             color = "orange"
         if p > 60.0:
             color = "gold"
@@ -411,92 +451,153 @@ class Leaf:
             color = "cyan"
         if p > 90.0:
             color = "lime"
-        digraph.node(name, label, style = "filled", color = color)
+            
+        digraph.node(name, label, style = "filled", color = color) # Creates the node.
+        
         return digraph
 
 class DecisionNode:
+    """ An object type that stores a question to classify data and is connected to two nodes, one for the data that satisfy the question and one dor the data that doesn't.
+    It is useful to has a structure for the tree.
+    """
     
     #O(1)
     def __init__(self, question, true_child, false_child):
+        """ Constructs a new DecisionNode object.
+        
+        :param question: an object of type Question.
+        :true_child: an object of type DecisionNode or Leaf.
+        :false_child: an object of type DecisionNode or Leaf.
+        """
         self.question = question
         self.true_child = true_child
         self.false_child = false_child
     
     #O(2^n)
     def imprimir(self, spacing = ""):
+        """ Creates a string with the question of the node and its children nodes.
+        
+        :return: a string.
+        """
         s = spacing + str(self.question) + "\n" + spacing + "--> True:" + "\n" + self.true_child.imprimir(spacing + "  ")  + "\n" + spacing + "--> False:" + "\n" + self.false_child.imprimir(spacing + "  ")
+        
         return s
     
     #O(2^n)
     def graph(self, digraph, name):
-        digraph.node(name, str(self.question)[3:len(str(self.question))-1], style = "filled")
-        digraph = self.true_child.graph(digraph, name + 't')
-        digraph.edge(name, name + 't', 'True')
-        digraph = self.false_child.graph(digraph, name + 'f')
-        digraph.edge(name, name + 'f', 'False')
+        """ Creates a digraph node with its connections to the children nodes.
+        
+        :param digraph: an object of type Digraph to create the node.
+        :param name: a string which will be the name of the created node.
+        :return: the same Digraph with the created node.
+        """
+        digraph.node(name, str(self.question)[3:len(str(self.question))-1], style = "filled") # Creates the root node.
+        
+        digraph = self.true_child.graph(digraph, name + 't')  # Creates the true child node.
+        digraph.edge(name, name + 't', 'True')  # Connects the root with its child.
+        
+        digraph = self.false_child.graph(digraph, name + 'f')  # Creates the false child node.
+        digraph.edge(name, name + 'f', 'False')  # Connects the root with its child.
+        
         return digraph
 
 class CARTTree:
+    """ An object type that access to a DecisionNode object to classify data, using the gini impurity.
+    Uses Graphviz to show a digraph with its structure.
+    """
 
     #O(2^n)
     def __init__(self, data, header, limit = -1):
+        """ Constructs a tree given a training dataset and its labels, using the gini impurity to create the nodes.
+        Stops when arrives to a level determined by the limit parameter if it is defined.
+        
+        :param data: a matrix that stores certain data such that its final column has the prediction values.
+        :param header: a list with the labels of the data to build the questions.
+        :param limit: maximum level of the tree.
+        """
         self.root = build_CART_tree(data, header, limit)
         self.header = header
     
     #O(2^n)
     def __str__(self):
+        """ Creates a string with the structure of the tree.
+        
+        :return: a string.
+        """
         return str(self.header) + "\n" + self.root.imprimir()
     
     #O(2^n)
     def graphic(self):
-        digraph = Digraph(format = "png")
+        """ Creates an object of type Digraph with the structure of the tree.
+        
+        :return: a Digraph object with the nodes of the tree and its edges.
+        """
+        digraph = Digraph(format = "png")  # Creates the digraph using Graphviz.
         return self.root.graph(digraph, 'r')
 
-
 class ID3Tree:
+    """ An object type that access to a DecisionNode object to classify data, using the entropy.
+    Uses Graphviz to show a digraph with its structure.
+    """
     
     #O(2^n)
     def __init__(self, data, header, limit = -1):
+        """ Constructs a tree given a training dataset and its labels, using the entropy to create the nodes.
+        Stops when arrives to a level determined by the limit parameter if it is defined.
+        
+        :param data: a matrix that stores certain data such that its final column has the prediction values.
+        :param header: a list with the labels of the data to build the questions.
+        :param limit: maximum level of the tree.
+        """
         self.root = build_ID3_tree(data, header, limit)
         self.header = header
     
     #O(2^n)
     def __str__(self):
+        """ Creates a string with the structure of the tree.
+        
+        :return: a string.
+        """
         return str(self.header) + "\n" + self.root.imprimir()
     
     #O(2^n)
     def graphic(self):
+        """ Creates an object of type Digraph with the structure of the tree.
+        
+        :return: a Digraph object with the nodes of the tree and its edges.
+        """
         digraph = Digraph(format = "png")
         return self.root.graph(digraph, 'r')
 
 class DefaultTree:
+    """ An object type that access to a DecisionNode object to classify data.
+    Uses Graphviz to show a digraph with its structure.
+    """
     
     #O(1)
     def __init__(self, root, header):
+        """ Constructs a tree given a DecisionNode as the root.
+        
+        :param root: an object of type DecisionNode.
+        :param header: a list with the labels of the data used to construc a previous tree to build the questions.
+        """
         self.root = root
         self.header = header
     
     #O(2^n)
     def __str__(self):
+        """ Creates a string with the structure of the tree.
+        
+        :return: a string.
+        """
         return str(self.header) + "\n" + self.root.imprimir()
     
     #O(2^n)
     def graphic(self):
+        """ Creates an object of type Digraph with the structure of the tree.
+        
+        :return: a Digraph object with the nodes of the tree and its edges.
+        """
         digraph = Digraph(format = "png")
         return self.root.graph(digraph, 'r')
 
-def classify(row, node):
-    if isinstance(node, Leaf):
-        return node.predictions
-
-    if node.question.match(row):
-        return classify(row, node.true_child)
-    else:
-        return classify(row, node.false_child)
-
-def print_prediction(predictions):
-    total = sum(predictions.values()) * 1.0
-    probs = {}
-    for lbl in predictions.keys():
-        probs[lbl] = str(int(predictions[lbl] / total * 100)) + "%"
-    return probs
