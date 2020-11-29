@@ -22,7 +22,9 @@ def class_counts(data):
     """ Creates a dictionary which stores the number of times that each prediction value appears given a certain data.
     
     :param data: a matrix that stores certain data such that its final column has the prediction values.
+    :type data: list
     :return: classes that is a dictionary which stores the number of times that each prediction value appears.
+    :rtype: dict
     """
     classes = {}  # Creates the dictionary.
     
@@ -40,6 +42,7 @@ def is_number(value):
     
     :param value: a value of any type.
     :return: a boolean.
+    :rtype: bool
     """
     return isinstance(value, int) or isinstance(value, float)
 
@@ -48,8 +51,11 @@ def critical_values(data, column):
     """ Creates a dictionary which stores the values with the greater and lower number of success cases from a column of a given data to get the best information gain.
     
     :param data: a matrix which stores certain data such that its final column has the prediction values.
+    :type data: list
     :param column: a list which stores values from a column of the given data.
+    :type column: list
     :return: a tuple with bestValue and worstValue which are the values with greater and lower number of success cases, respectively.
+    :rtype: tuple
     """
     values = {} # Creates the values dictionary.
     
@@ -79,8 +85,11 @@ def partition(data, question):
     """ Divides a given data in two matrices matching each row of the data with a given question.
     
     :param data: a matrix which stores certain data.
+    :type data: list
     :param question: an object of type Question that determines if a given value satisfy certain condition.
+    :type question: Question
     :return: true_rows and false_rows that are the matrices with the rows that satisfy the condition of the question and the rows that do not, respectively.
+    :rtype: tuple
     """
     true_rows, false_rows = [], []  # Creates the matrices.
     
@@ -97,7 +106,9 @@ def gini(data):
     """ Calculates the gini index of a given data.
     
     :param data: a matrix which stores certain data.
+    :type data: list
     :return: impurity which is the gini index.
+    :rtype: float
     """
     counts = class_counts(data)  # Counts the prediction values to determine the formula.
     impurity = 1 
@@ -113,7 +124,9 @@ def entropy(data):
     """ Calculates the entropy of a given data.
     
     :param data: a matrix which stores certain data.
+    :type data: list
     :return: impurity which is the entropy.
+    :rtype: float
     """
     counts = class_counts(data)  # Counts the prediction values to determine the formula.
     impurity = 0
@@ -129,9 +142,13 @@ def info_gain(left, right, current_uncertainty):
     """ Calculates the information with the partition of certain data and a given gini impurity.
     
     :param left: a matrix with certain data.
+    :type left: list
     :param right: a matrix with certain data.
+    :type right: list
     :param current_uncertainty: the gini impurity of the data.
+    :type current_uncertainty: float
     :return: a float which is the information gain of the data.
+    :rtype: float
     """
     p = float(len(left)) / (len(left) + len(right))
     
@@ -142,9 +159,13 @@ def info_gain_e(left, right, current_uncertainty):
     """ Calculates the information with the partition of certain data and a given entropy.
     
     :param left: a matrix with certain data.
+    :type left: list
     :param right: a matrix with certain data.
-    :param current_uncertainty: the gini impurity of the data.
+    :type right: list
+    :param current_uncertainty: the entropy of the data.
+    :type current_uncertainty: float
     :return: a float which is the information gain of the data.
+    :rtype: float
     """
     p = float(len(left)) / (len(left) + len(right))
     
@@ -155,8 +176,11 @@ def find_best_split_CART(data, header):
     """ Determines which column and value give the best information gain using the gini impurity and build an object of type Question with that value.
     
     :param data: a matrix that stores certain data such that its final column has the prediction values.
+    :type data: list
     :param header: a list with the labels of the data to build the questions.
+    :type header: list
     :return: a tuple with best_gain and best_question which are the value of the best information gain and the question with the value that gave that gain.
+    :rtype: tuple
     """
     best_gain = 0
     best_question = None
@@ -187,8 +211,11 @@ def find_best_split_ID3(data, header):
     """ Determines which column and value give the best information gain using the entropy and build an object of type Question with that value.
     
     :param data: a matrix that stores certain data such that its final column has the prediction values.
+    :type data: list
     :param header: a list with the labels of the data to build the questions.
+    :type header: list
     :return: a tuple with best_gain and best_question which are the value of the best information gain and the question with the value that gave that gain.
+    :rtype: tuple
     """
     best_gain = 0
     best_question = None
@@ -219,9 +246,13 @@ def build_CART_tree(data, header, limit = -1):
     """ Recursively creates an object of type DecisionNode as a Node of a CART Tree.
     
     :param data: a matrix that stores certain data such that its final column has the prediction values.
+    :type data: list
     :param header: a list with the labels of the data to build the questions.
+    :type header: list
     :param limit: maximum level of the tree.
-    :return: an object of type DecisionNode.
+    :type limit: int
+    :return: an object of type DecisionNode or Leaf.
+    :rtype: DecisionNode or Leaf
     """
     if limit == 0:  # If the tree arrives to the max level of recursion, creates a Leaf.
         return Leaf(data)
@@ -243,9 +274,13 @@ def build_ID3_tree(data, header, limit = -1):
     """ Recursively creates an object of type DecisionNode as a Node of a ID3 Tree.
     
     :param data: a matrix that stores certain data such that its final column has the prediction values.
+    :type data: list
     :param header: a list with the labels of the data to build the questions.
+    :type header: list
     :param limit: maximum level of the tree.
-    :return: an object of type DecisionNode.
+    :type limit: int
+    :return: an object of type DecisionNode or Leaf.
+    :rtype: DecisionNode or Leaf
     """
     
     if limit == 0:  # If the tree arrives to the max level of recursion, creates a Leaf.
@@ -268,6 +303,7 @@ def import_tree():
     """ Reads a .txt file and creates an object of type DefaultTree if it is a print of a previously made CART or ID3 Tree.
     
     :return: tree that is the CART or ID3 tree previously made.
+    :rtype: DefaultTree
     """
     r = str(input("Ingrese el nombre del archivo a leer: "))  # Interaction with the user.
     print()
@@ -290,8 +326,11 @@ def read_node(f, header):
     """ With a opened file, determines with each line of the file if it refers to a Node or a Leaf and creates it.
     
     :param f: an opened .txt file with a saved tree.
+    :type f: File
     :param header: the labels of the data to build the questions of the nodes.
+    :type header: list
     :return: an object or type DecisionNode or Leaf.
+    :rtype: DecisionNode or Leaf or None
     """
     s = f.readline()
     
@@ -339,8 +378,11 @@ def classify(row, node):
     """ Calculates the probability os success of a given data, using the leaves of a given tree.
     
     :param row: a row from certain dataset.
+    :type row: list
     :param node: an object of type DecisionNode which stores the question to classify.
+    :type node: DecisionNode
     :return: a dictionary with the predictions of success.
+    :rtype: dict
     """
     if isinstance(node, Leaf):  # If the node is a Leaf, return the predictions.
         return node.predictions
@@ -355,7 +397,9 @@ def print_prediction(predictions):
     """ Creates a dictionary with the probability of success and failure with the predictions of a leaf.
     
     :param predictions: a dictionary with the predictions of a Leaf object.
+    :type predictions: dict
     :return: a dictionary.
+    :rtype: dict
     """
     total = sum(predictions.values()) * 1.0
     probs = {}
@@ -374,8 +418,10 @@ class Question:
         """ Constructs a new Question object.
         
         :param column: a column of certain data.
+        :type column: list
         :param value: a value of any type.
         :param header: the labels of the data to classify.
+        :type header: list
         """
         self.column = column
         self.value = value
@@ -386,7 +432,9 @@ class Question:
         """ Determines if a given data satisfies the condition of the question.
         
         :param data: the data to classify.
+        :type data: list
         :return: a boolean.
+        :rtype: bool
         """
         val = data[self.column]
         
@@ -400,6 +448,7 @@ class Question:
         """ Creates a string where is the question with the label and value to check.
         
         :return: a string.
+        :rtype: str
         """
         condition = "=="
         if is_number(self.value):  # If the question uses a numeric value.
@@ -415,6 +464,7 @@ class Leaf:
         """ Counts the cases of success and failure of a given data and storages it in a dictionary.
         
         :param data: a matrix that stores certain data such that its final column has the prediction values.
+        :type data: list
         """
         self.predictions = class_counts(data)
     
@@ -423,6 +473,7 @@ class Leaf:
         """ Creates a string with the cases of each prediction value appearance in the data.
         
         :return: a string.
+        :rtype: str
         """
         return spacing + "Prediction: " + str(self.predictions)
     
@@ -432,8 +483,11 @@ class Leaf:
         Colors the node by the probability. Red if it is less than 50, orange if it is less than 60, gold if it is less than 75, cyan if it is less than 90 and green if it is greater than 90.
         
         :param digraph: an object of type Digraph to create the node.
+        :type digraph: Digraph
         :param name: a string which will be the name of the created node.
+        :type name: str
         :return: the same Digraph with the created node.
+        :rtype: Digraph
         """
         try:
             p = round((self.predictions.get(1)/(sum(self.predictions.values()) * 1.0)) * 100, 2)  # Calculates the probaility of success.
@@ -466,8 +520,11 @@ class DecisionNode:
         """ Constructs a new DecisionNode object.
         
         :param question: an object of type Question.
-        :true_child: an object of type DecisionNode or Leaf.
-        :false_child: an object of type DecisionNode or Leaf.
+        :type question: Question
+        :param true_child: an object of type DecisionNode or Leaf.
+        :type true_child: DecisionNode or Leaf
+        :param false_child: an object of type DecisionNode or Leaf.
+        :type false_child: DecisionNode or Leaf
         """
         self.question = question
         self.true_child = true_child
@@ -478,6 +535,7 @@ class DecisionNode:
         """ Creates a string with the question of the node and its children nodes.
         
         :return: a string.
+        :rtype: str
         """
         s = spacing + str(self.question) + "\n" + spacing + "--> True:" + "\n" + self.true_child.imprimir(spacing + "  ")  + "\n" + spacing + "--> False:" + "\n" + self.false_child.imprimir(spacing + "  ")
         
@@ -488,8 +546,11 @@ class DecisionNode:
         """ Creates a digraph node with its connections to the children nodes.
         
         :param digraph: an object of type Digraph to create the node.
+        :type digraph: Digraph
         :param name: a string which will be the name of the created node.
+        :type name: str
         :return: the same Digraph with the created node.
+        :rtype: Digraph
         """
         digraph.node(name, str(self.question)[3:len(str(self.question))-1], style = "filled") # Creates the root node.
         
@@ -512,8 +573,11 @@ class CARTTree:
         Stops when arrives to a level determined by the limit parameter if it is defined.
         
         :param data: a matrix that stores certain data such that its final column has the prediction values.
+        :type data: list
         :param header: a list with the labels of the data to build the questions.
+        :type header: list
         :param limit: maximum level of the tree.
+        :type limit: int
         """
         self.root = build_CART_tree(data, header, limit)
         self.header = header
@@ -523,6 +587,7 @@ class CARTTree:
         """ Creates a string with the structure of the tree.
         
         :return: a string.
+        :rtype: str
         """
         return str(self.header) + "\n" + self.root.imprimir()
     
@@ -531,6 +596,7 @@ class CARTTree:
         """ Creates an object of type Digraph with the structure of the tree.
         
         :return: a Digraph object with the nodes of the tree and its edges.
+        :rtype: Digraph
         """
         digraph = Digraph(format = "png")  # Creates the digraph using Graphviz.
         return self.root.graph(digraph, 'r')
@@ -546,8 +612,11 @@ class ID3Tree:
         Stops when arrives to a level determined by the limit parameter if it is defined.
         
         :param data: a matrix that stores certain data such that its final column has the prediction values.
+        :type data: list
         :param header: a list with the labels of the data to build the questions.
+        :type header: list
         :param limit: maximum level of the tree.
+        :type limit: int
         """
         self.root = build_ID3_tree(data, header, limit)
         self.header = header
@@ -557,6 +626,7 @@ class ID3Tree:
         """ Creates a string with the structure of the tree.
         
         :return: a string.
+        :rtype: str
         """
         return str(self.header) + "\n" + self.root.imprimir()
     
@@ -565,6 +635,7 @@ class ID3Tree:
         """ Creates an object of type Digraph with the structure of the tree.
         
         :return: a Digraph object with the nodes of the tree and its edges.
+        :rtype: Digraph.
         """
         digraph = Digraph(format = "png")
         return self.root.graph(digraph, 'r')
@@ -578,8 +649,10 @@ class DefaultTree:
     def __init__(self, root, header):
         """ Constructs a tree given a DecisionNode as the root.
         
-        :param root: an object of type DecisionNode.
+        :param root: an object of type DecisionNode or Leaf.
+        :type: DecisionNode or Leaf
         :param header: a list with the labels of the data used to construc a previous tree to build the questions.
+        :type header: list
         """
         self.root = root
         self.header = header
@@ -589,6 +662,7 @@ class DefaultTree:
         """ Creates a string with the structure of the tree.
         
         :return: a string.
+        :rtype: str
         """
         return str(self.header) + "\n" + self.root.imprimir()
     
@@ -597,6 +671,7 @@ class DefaultTree:
         """ Creates an object of type Digraph with the structure of the tree.
         
         :return: a Digraph object with the nodes of the tree and its edges.
+        :rtype: Digraph
         """
         digraph = Digraph(format = "png")
         return self.root.graph(digraph, 'r')
