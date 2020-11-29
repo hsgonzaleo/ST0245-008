@@ -326,7 +326,7 @@ def read_node(f, header):
     """ With a opened file, determines with each line of the file if it refers to a Node or a Leaf and creates it.
     
     :param f: an opened .txt file with a saved tree.
-    :type f: File
+    :type f: TextIOWrapper
     :param header: the labels of the data to build the questions of the nodes.
     :type header: list
     :return: an object or type DecisionNode or Leaf.
