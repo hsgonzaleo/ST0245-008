@@ -299,13 +299,32 @@ def guardar_predicciones(tree, test, header):
 
 def imprimir_matriz(tree, test, header):
     os.system("cls")
-    print("Pendiente...\n")
+    M = Tree.error_matrix(test, tree.root)
+    columns = ["Positivos", "Negativos"]
+    rows = ["Verdaderos", "Falsos"]
+    M = pd.DataFrame(M, index = rows, columns = columns)
+    print(M)
+    print()
     os.system("pause")
     pass
 
 def guardar_matriz(tree, test, header):
     os.system("cls")
-    print("Pendiente...\n")
+    g = str(input("Ingrese el nombre del archivo a guardar: "))
+    print()
+    os.system("pause")
+    os.system("cls")
+    print("Guardando...\n")
+    M = Tree.error_matrix(test, tree.root)
+    columns = ["Positivos", "Negativos"]
+    rows = ["Verdaderos", "Falsos"]
+    M = pd.DataFrame(M, index = rows, columns = columns)
+    f = open(g, "w")
+    f.write(str(M))
+    f.close()
+    os.system("pause")
+    os.system("cls")
+    print("Éxito al guardar.\n")
     os.system("pause")
     pass
 
