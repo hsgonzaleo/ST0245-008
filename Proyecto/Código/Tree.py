@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -13,6 +12,8 @@ Uses Graphviz to graph the tree.
 import math  # To use some math functions.
 from graphviz import Digraph  # To graph the tree.
 import os  # To facilitate interaction with users.
+import DataManager as dm  # To use the read methods for the time testing.
+import cProfile # To calculate the time profile of the algorithm.
 
 
 # AUXILIARY METHODS
@@ -111,7 +112,7 @@ def gini(data):
     :rtype: float
     """
     counts = class_counts(data)  # Counts the prediction values to determine the formula.
-    impurity = 1 
+    impurity = 1.0 
     
     for label in counts:
         prob_of_lbl = counts[label] / float(len(data))
@@ -129,7 +130,7 @@ def entropy(data):
     :rtype: float
     """
     counts = class_counts(data)  # Counts the prediction values to determine the formula.
-    impurity = 0
+    impurity = 0.0
     
     for label in counts:
         prob_of_lbl = counts[label] / float(len(data))
@@ -444,6 +445,7 @@ def error_matrix(test, node):
 
     return M
 
+
 # TREE IMPLEMENTATION.
 
 class Question:
@@ -712,4 +714,25 @@ class DefaultTree:
         """
         digraph = Digraph(format = "png")
         return self.root.graph(digraph, 'r')
+
+# TESTING TIME
+"""
+def testing_classify(data, tree):
+    probabilities = []
+    for row in data:
+        predictions = classify(row, tree.root)
+        total = sum(predictions.values()) * 1.0
+        probs = {}
+        for lbl in predictions.keys():
+            probs[lbl] = str(int(predictions[lbl] / total * 100)) + "%"
+        probabilities.append(probs)
+    return probabilities
+    
+train, labels = dm.testing_read_csv("TRAIN 4.csv")
+test, labels2 = dm.testing_read_csv("TEST 4.csv")
+cProfile.run('CARTTree(train, labels, 11)')
+
+tree = CARTTree(train, labels, 11)
+cProfile.run('testing_classify(test, tree)')
+"""
 
