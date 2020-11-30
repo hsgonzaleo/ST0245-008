@@ -407,6 +407,43 @@ def print_prediction(predictions):
         probs[lbl] = str(int(predictions[lbl] / total * 100)) + "%"
     return probs
 
+#O(n^2)
+def error_matrix(test, node):
+    """ Creates the error matrix of a CART or ID3 tree using certain data.
+
+    :param test: a matrix that stores certain data such that its final column has the prediction values.
+    :type test: list
+    :param node: an object of type DecisionNode which stores the question to classify.
+    :type node: DecisionNode
+    :return: the created error matrix.
+    :rtype: list
+    """
+    M = [[0,0], [0,0]]  # Creates the error matrix.
+
+    for row in test:
+
+        predictions = classify(row, node)  #Searches the predicted value according to the success probability of the data.
+        predicted = None
+        for label in predictions:
+            if predicted == None:
+                predicted = label
+            elif predictions[label] > predictions[predicted]:
+                predicted = label
+
+        predicted_value = int(predicted)
+        actual_value = int(row[-1])
+
+        if predicted_value == 1 and actual_value == 1:  # True Positive.
+             M[0][0] += 1
+        if predicted_value == 1 and actual_value == 0:  # True Negative.
+             M[0][1] += 1
+        if predicted_value == 0 and actual_value == 1:  # False Positive.
+             M[1][0] += 1
+        if predicted_value == 0 and actual_value == 0:  # False Negative.
+             M[1][1] += 1
+
+    return M
+
 # TREE IMPLEMENTATION.
 
 class Question:
